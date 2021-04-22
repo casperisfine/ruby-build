@@ -249,6 +249,28 @@ make install
 OUT
 }
 
+@test "RUBY_CONFIGURE_OPTS has precedence over definition directives" {
+  cached_tarball "ruby-2.0.0"
+
+  stub brew
+  stub_make_install
+
+  export RUBY_CONFIGURE_OPTS='--disable-shared'
+  run_inline_definition <<DEF
+install_package "ruby-2.0.0" "http://ruby-lang.org/ruby/2.0/ruby-2.0.0.tar.gz" enable_shared
+DEF
+  # assert_success
+
+  assert_build_log <<OUT
+ruby-2.0.0: --prefix=$INSTALL_ROOT --with-readline-dir=/custom
+make -j 2
+make install
+OUT
+
+  unstub brew
+  unstub make
+}
+
 @test "number of CPU cores defaults to 2" {
   cached_tarball "ruby-2.0.0"
 
